@@ -46,7 +46,7 @@ app.post("/participants", async (req, res) => {
         const participantExists=await db.collection("participants").findOne({name: participant.name});
         
         if(participantExists){
-            res.send(409);
+            res.sendStatus(409);
             return;
         }
 
@@ -61,12 +61,31 @@ app.post("/participants", async (req, res) => {
             type: "status",
             time: dayjs().format("HH:mm:ss")
         });
-        res.send(201);
+        res.sendStatus(201);
         
     }catch(error){
         res.status(500).send(error.message);
     }
 
 });
+app.get("/participants", async (req, res) => {
+    try{
+        const participants=await db.collection("participants").find().toArray();
+
+        if(!participants){
+            res.status(404).send("Ninguém foi encontrado");
+            return;
+        }
+        res.send(participants);
+    }catch(error){
+        res.status(500).send(error.message);
+    }
+});
+
+// /messages
+
+// /status
+
+// remoção automática
 
 app.listen(5000, ()=>console.log("Running"));
