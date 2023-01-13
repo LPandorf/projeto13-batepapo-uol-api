@@ -21,7 +21,7 @@ mongoClient.connect().then(()=>{
 //formatos
 const participantFormat=joi.object({
     name: joi.string().min(1).required(),
-    laststatus: Date.now()
+    laststatus: joi.number()
 });
 const messageFormat=joi.object({
     from: joi.string().required(),
