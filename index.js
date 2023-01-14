@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
-import joi, { number } from "joi";
+import joi from "joi";
 import dayjs from "dayjs";
 
 dotenv.config();
@@ -135,7 +135,7 @@ app.get("/messages", async (req, res)=>{
         if(limit && limit!==NaN){
             return res.send(filtered.slice(-limit));
         }
-        
+
         res.send(filtered);
     }catch(error){
         res.status(500).send(error.message);
