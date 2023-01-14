@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
-import joi from "joi";
+import joi, { number } from "joi";
 import dayjs from "dayjs";
 
 dotenv.config();
@@ -83,8 +83,63 @@ app.get("/participants", async (req, res) => {
 });
 
 // /messages
-app.post("/messages", async(req, res) => {
+app.post("/messages", async (req, res) => {
+    const {to, text, type}=req.body;
+    const {user}=req.headers;
 
+    try{
+        const message = {
+            from: user,
+            to,
+            text,
+            type,
+            time: dayjs.format("HH:mm:ss")
+        };
+
+        const validation=messageFormat.validate(message, {abortEarly: false});
+
+        if(validation.error){
+            const errors=validation.error.details.map((detail)=>detail.message);
+            res.status(422).send(errors);
+            return;
+        }
+
+        const participantExists=await db.collection("participants").findOne({name: user});
+        
+        if(!participantExists){
+            res.sendStatus(409);
+            return;
+        }
+
+        await db.collection("messages").insertOne(message);
+        res.sendStatus(201);
+
+    }catch(error){
+        res.status(200).send(error.message);
+    }
+});
+app.get("/messages", async (req, res)=>{
+    const limit=parseInt(req.params.limit);
+    const {user}=req.headers;
+
+    try{
+        const messages = await db.collection("messages").find().toArray();
+        const filtered = messages.filter((message)=>{
+            const {from,to,type} = message;
+            const toUser=to==="todos" || to===user || from===user;
+            const inPublic=type==="message";
+
+            return toUser || inPublic;
+        });
+        
+        if(limit && limit!==NaN){
+            return res.send(filtered.slice(-limit));
+        }
+        
+        res.send(filtered);
+    }catch(error){
+        res.status(500).send(error.message);
+    }
 });
 
 // /status
