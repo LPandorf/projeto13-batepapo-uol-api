@@ -143,6 +143,24 @@ app.get("/messages", async (req, res)=>{
 });
 
 // /status
+app.post("status", async (req, res) =>{
+    const {user} = req.headers;
+
+    try{
+        const existing=await db.collection("participants").findOne({name:user});
+
+        if(!existing){
+            res.sendStatus(404);
+            return;
+        }
+
+        await db.collection("participants").updateOne({name:user},{$set:{laststatus:Date.now()}});
+
+        res.sendStatus(200);
+    }catch(error){
+        res.status(500).send(error.message);
+    }
+});
 
 // remoção automática
 
