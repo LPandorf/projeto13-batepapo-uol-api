@@ -163,5 +163,32 @@ app.post("status", async (req, res) =>{
 });
 
 // remoção automática
+setInterval(async ()=>{
+    const seconds=Date.now()-10000;
+
+    try{
+        const inactivity=await db.collection("participants").find({laststatus:{$lte: seconds}}).toArray();
+
+        if(inactivity.length>0){
+            const inactivityMessages=inactivity.map(
+                (inactivity)=>{
+                    return {
+                        from: inactivity,
+                        to: "Todos",
+                        text: "sai da sala...",
+                        type: "status",
+                        time: dayjs().format("HH:mm:ss")
+                    };
+
+                }
+            );
+
+            await db.collection("messages").insertMany(inactivityMessages);
+            await db.collection("participants").deleteMany({laststatus:{$lte: seconds}});
+        }
+    }catch(error){
+        res.status(500).send(error.message);
+    }
+}, 15000);
 
 app.listen(5000, ()=>console.log("Running"));
