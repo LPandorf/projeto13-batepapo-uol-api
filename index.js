@@ -19,12 +19,12 @@ mongoClient.connect().then(()=>{
 });
 
 //formatos
-const participantFormat=joi.object({
+/* const participantFormat=joi.object({
     name: joi.string().min(1).required(),
     laststatus: joi.number()
-});
+}); */
 const messageFormat=joi.object({
-    from: joi.string().required(),
+    //from: joi.string().required(),
     to: joi.string().min(1).required(),
     text: joi.string().min(1).required(),
     type: joi.string().valid("message", "private_message").required(),
@@ -33,6 +33,46 @@ const messageFormat=joi.object({
 
 // /participants
 app.post("/participants", async (req, res) => {
+    const participant = req.body;
+    const participantFormat=joi.object({
+        name: joi.string().min(1).required(),
+    });
+    const validation=participantFormat.validate(participant, {abortEarly: false});
+
+    if(validation.error){
+        const errors= validation.error.details.map((detail)=> detail.message);
+        res.status(422).send(errors);
+        return;
+    }
+
+    try{
+        const participantExists= await db.collection("participants").findOne({name: participant.name});
+        if(participantExists){
+            res.sendStatus(409);
+            return;
+        }
+
+        await db.collection("participants").insertOne({
+            name: participant.name, 
+            laststatus: Date.now()
+        });
+
+        await db.collection("messages").insertOne({
+            from: participant.name,
+            to: "Todos",
+            text: "entra na sala...",
+            type: "status",
+            time: dayjs().format("HH:mm:ss")
+        });
+        
+        res.sendStatus(201);
+        
+    }catch(error){
+        res.status(500).send(error.message);
+    }
+
+});
+/* app.post("/participants", async (req, res) => {
     const participant = req.body;
     const validation=participantFormat.validate(participant, {abortEarly: false});
 
@@ -59,7 +99,7 @@ app.post("/participants", async (req, res) => {
             to: "Todos",
             text: "entra na sala...",
             type: "status",
-            time: dayjs().format("HH:MM:SS")
+            time: dayjs().format("HH:mm:ss")
         });
         res.sendStatus(201);
         
@@ -67,7 +107,7 @@ app.post("/participants", async (req, res) => {
         res.status(500).send(error.message);
     }
 
-});
+}); */
 app.get("/participants", async (req, res) => {
     try{
         const participants=await db.collection("participants").find().toArray();
@@ -84,19 +124,16 @@ app.get("/participants", async (req, res) => {
 
 // /messages
 app.post("/messages", async (req, res) => {
-    const {to, text, type}=req.body;
-    const {User}=req.headers;
+    const {servermessage}=req.body;
+    const {user}=req.headers;
 
     try{
+        const validation=messageFormat.validate(servermessage, {abortEarly: false});
         const message = {
-            from: User,
-            to,
-            text,
-            type,
-            time: dayjs().format("HH:MM:SS")
+            from: user,
+            ...servermessage,
+            time: dayjs().format("HH:mm:ss")
         };
-
-        const validation=messageFormat.validate(message, {abortEarly: false});
 
         if(validation.error){
             const errors=validation.error.details.map((detail)=>detail.message);
@@ -120,13 +157,13 @@ app.post("/messages", async (req, res) => {
 });
 app.get("/messages", async (req, res)=>{
     const limit=parseInt(req.params.limit);
-    const {User}=req.headers;
+    const {user}=req.headers;
 
     try{
         const messages = await db.collection("messages").find().toArray();
         const filtered = messages.filter((message)=>{
             const {from,to,type} = message;
-            const toUser=to==="todos" || to===User || from===User;
+            const toUser=to==="todos" || to===user || from===user;
             const inPublic=type==="message";
 
             return toUser || inPublic;
@@ -144,17 +181,17 @@ app.get("/messages", async (req, res)=>{
 
 // /status
 app.post("status", async (req, res) =>{
-    const {User} = req.headers;
+    const {user} = req.headers;
 
     try{
-        const existing=await db.collection("participants").findOne({name:User});
+        const existing=await db.collection("participants").findOne({name: user});
 
         if(!existing){
             res.sendStatus(404);
             return;
         }
 
-        await db.collection("participants").updateOne({name:User},{$set:{laststatus:Date.now()}});
+        await db.collection("participants").updateOne({name: uSser},{$set:{laststatus:Date.now()}});
 
         res.sendStatus(200);
     }catch(error){
@@ -177,7 +214,7 @@ setInterval(async ()=>{
                         to: "Todos",
                         text: "sai da sala...",
                         type: "status",
-                        time: dayjs().format("HH:MM:SS")
+                        time: dayjs().format("HH:mm:ss")
                     };
 
                 }
