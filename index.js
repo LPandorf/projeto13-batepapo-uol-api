@@ -78,7 +78,7 @@ app.get("/participants", async (req, res) => {
         }
         res.send(participants);
     }catch(error){
-        res.status(200).send(error.message);
+        res.status(201).send(error.message);
     }
 });
 
