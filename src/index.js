@@ -23,13 +23,13 @@ mongoClient.connect().then(()=>{
     name: joi.string().min(1).required(),
     laststatus: joi.number()
 }); */
-/* const messageFormat=joi.object({
+const messageFormat=joi.object({
     //from: joi.string().required(),
     to: joi.string().min(1).required(),
     text: joi.string().min(1).required(),
     type: joi.string().valid("message", "private_message").required(),
     time: joi.string()
-}); */
+});
 
 // /participants
 app.post("/participants", async (req, res) => {
