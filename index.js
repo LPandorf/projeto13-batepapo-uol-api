@@ -64,7 +64,7 @@ app.post("/participants", async (req, res) => {
         res.sendStatus(201);
         
     }catch(error){
-        res.status(500).send(error.message);
+        res.status(201).send(error.message);
     }
 
 });
