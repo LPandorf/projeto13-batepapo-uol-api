@@ -115,7 +115,7 @@ app.post("/messages", async (req, res) => {
         res.sendStatus(201);
 
     }catch(error){
-        res.status(200).send(error.message);
+        res.status(201).send(error.message);
     }
 });
 app.get("/messages", async (req, res)=>{
