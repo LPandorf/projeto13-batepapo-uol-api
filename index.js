@@ -64,7 +64,7 @@ app.post("/participants", async (req, res) => {
         res.sendStatus(201);
         
     }catch(error){
-        res.status(201).send(error.message);
+        res.status(500).send(error.message);
     }
 
 });
@@ -78,7 +78,7 @@ app.get("/participants", async (req, res) => {
         }
         res.send(participants);
     }catch(error){
-        res.status(201).send(error.message);
+        res.status(500).send(error.message);
     }
 });
 
@@ -115,7 +115,7 @@ app.post("/messages", async (req, res) => {
         res.sendStatus(201);
 
     }catch(error){
-        res.status(201).send(error.message);
+        res.status(500).send(error.message);
     }
 });
 app.get("/messages", async (req, res)=>{
