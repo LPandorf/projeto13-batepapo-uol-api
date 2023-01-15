@@ -15,7 +15,7 @@ app.use(express.json());
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
 let db;
 mongoClient.connect().then(()=>{
-    db=mongoClient.db("batepapouol");
+    db=mongoClient.db();
 });
 
 //formatos
