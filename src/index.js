@@ -124,6 +124,40 @@ app.get("/participants", async (req, res) => {
 
 // /messages
 app.post("/messages", async (req, res) => {
+    const serverMessage = req.body;
+    const { user } = req.headers;
+
+    try {
+        const validation = messageFormat.validate(serverMessage, { abortEarly: false });
+
+        const message = {
+            from: user,
+            ...serverMessage,
+            time: dayjs().format("HH:MM:SS")
+        };
+
+
+        if (validation.error) {
+            const errors = validation.error.details.map((detail) => detail.message);
+            res.status(422).send(errors);
+            return;
+        }
+
+        const participantExists = await db.collection("participants").findOne({ name: user });
+
+        if (!participantExists) {
+            res.sendStatus(409);
+            return;
+        }
+
+        await db.collection("messages").insertOne(message);
+        res.sendStatus(201);
+
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+/* app.post("/messages", async (req, res) => {
     const {servermessage}=req.body;
     const {user}=req.headers;
 
@@ -154,7 +188,7 @@ app.post("/messages", async (req, res) => {
     }catch(error){
         res.status(500).send(error.message);
     }
-});
+}); */
 app.get("/messages", async (req, res)=>{
     const limit=parseInt(req.params.limit);
     const {user}=req.headers;
@@ -200,7 +234,7 @@ app.post("status", async (req, res) =>{
 });
 
 // remoção automática
-setInterval(async ()=>{
+/* setInterval(async ()=>{
     const seconds=Date.now()-10000;
 
     try{
@@ -226,6 +260,6 @@ setInterval(async ()=>{
     }catch(error){
         res.status(500).send(error.message);
     }
-},15000);
+},15000); */
 
 app.listen(5000, ()=>console.log("Running"));
