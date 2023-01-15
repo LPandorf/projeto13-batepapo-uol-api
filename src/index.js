@@ -195,24 +195,26 @@ app.post("/messages", async (req, res) => {
     }
 }); */
 app.get("/messages", async (req, res)=>{
-    const limit=parseInt(req.params.limit);
+    const limit=parseInt(req.query.limit);
     const {user}=req.headers;
 
     try{
-        const messages = await db.collection("messages").find().toArray();
+        /* const messages = await db.collection("messages").find().toArray();
         const filtered = messages.filter((message)=>{
             const {from,to,type} = message;
             const toUser=to==="todos" || to===user || from===user;
             const inPublic=type==="message";
 
             return toUser || inPublic;
-        });
+        }); */
+
+        const messages = await db.collection("messages").find({ $or: [{ from: user }, { to: "Todos" }, { to: user }] }).toArray();
         
         if(limit && limit!==NaN){
-            return res.send(filtered.slice(-limit));
+            return res.send(messages.slice(-limit));
         }
 
-        res.send(filtered);
+        res.send(messages);
     }catch(error){
         res.status(500).send(error.message);
     }
