@@ -28,7 +28,7 @@ const messageFormat=joi.object({
     to: joi.string().min(1).required(),
     text: joi.string().min(1).required(),
     type: joi.string().valid("message", "private_message").required(),
-    time: joi.string()
+    //time: joi.string()
 });
 
 // /participants
@@ -136,7 +136,6 @@ app.post("/messages", async (req, res) => {
             ...serverMessage,
             time: dayjs().format("HH:mm:ss")
         };
-
 
         if (validation.error) {
             const errors = validation.error.details.map((detail) => detail.message);
