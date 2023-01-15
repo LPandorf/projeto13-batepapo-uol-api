@@ -59,7 +59,7 @@ app.post("/participants", async (req, res) => {
             to: "Todos",
             text: "entra na sala...",
             type: "status",
-            time: dayjs().format("HH:mm:ss")
+            time: dayjs().format("HH:MM:SS")
         });
         res.sendStatus(201);
         
@@ -85,15 +85,15 @@ app.get("/participants", async (req, res) => {
 // /messages
 app.post("/messages", async (req, res) => {
     const {to, text, type}=req.body;
-    const {user}=req.headers;
+    const {User}=req.headers;
 
     try{
         const message = {
-            from: user,
+            from: User,
             to,
             text,
             type,
-            time: dayjs.format("HH:mm:ss")
+            time: dayjs().format("HH:MM:SS")
         };
 
         const validation=messageFormat.validate(message, {abortEarly: false});
@@ -120,13 +120,13 @@ app.post("/messages", async (req, res) => {
 });
 app.get("/messages", async (req, res)=>{
     const limit=parseInt(req.params.limit);
-    const {user}=req.headers;
+    const {User}=req.headers;
 
     try{
         const messages = await db.collection("messages").find().toArray();
         const filtered = messages.filter((message)=>{
             const {from,to,type} = message;
-            const toUser=to==="todos" || to===user || from===user;
+            const toUser=to==="todos" || to===User || from===User;
             const inPublic=type==="message";
 
             return toUser || inPublic;
@@ -144,17 +144,17 @@ app.get("/messages", async (req, res)=>{
 
 // /status
 app.post("status", async (req, res) =>{
-    const {user} = req.headers;
+    const {User} = req.headers;
 
     try{
-        const existing=await db.collection("participants").findOne({name:user});
+        const existing=await db.collection("participants").findOne({name:User});
 
         if(!existing){
             res.sendStatus(404);
             return;
         }
 
-        await db.collection("participants").updateOne({name:user},{$set:{laststatus:Date.now()}});
+        await db.collection("participants").updateOne({name:User},{$set:{laststatus:Date.now()}});
 
         res.sendStatus(200);
     }catch(error){
@@ -177,7 +177,7 @@ setInterval(async ()=>{
                         to: "Todos",
                         text: "sai da sala...",
                         type: "status",
-                        time: dayjs().format("HH:mm:ss")
+                        time: dayjs().format("HH:MM:SS")
                     };
 
                 }
