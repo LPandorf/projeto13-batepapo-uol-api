@@ -151,7 +151,7 @@ app.post("/messages", async (req, res) => {
         }  */
 
         if (!participantExists) {
-            res.sendStatus(409);
+            res.sendStatus(422);
             return;
         }
 
