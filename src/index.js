@@ -54,7 +54,7 @@ app.post("/participants", async (req, res) => {
 
         await db.collection("participants").insertOne({
             name: participant.name, 
-            laststatus: Date.now()
+            lastStatus: Date.now()
         });
 
         await db.collection("messages").insertOne({
@@ -149,7 +149,7 @@ app.post("/messages", async (req, res) => {
             res.sendStatus(422);
             return;
         }
-        
+
         if (!participantExists) {
             res.sendStatus(409);
             return;
@@ -230,7 +230,7 @@ app.post("status", async (req, res) =>{
             return;
         }
 
-        await db.collection("participants").updateOne({name: uSser},{$set:{laststatus:Date.now()}});
+        await db.collection("participants").updateOne({name: uSser},{$set:{lastStatus:Date.now()}});
 
         res.sendStatus(200);
     }catch(error){
@@ -239,7 +239,7 @@ app.post("status", async (req, res) =>{
 });
 
 // remoção automática
-/* setInterval(async ()=>{
+setInterval(async ()=>{
     const seconds=Date.now()-10000;
 
     try{
@@ -265,6 +265,6 @@ app.post("status", async (req, res) =>{
     }catch(error){
         res.status(500).send(error.message);
     }
-},15000); */
+},15000);
 
 app.listen(5000, ()=>console.log("Running"));
