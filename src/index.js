@@ -145,6 +145,11 @@ app.post("/messages", async (req, res) => {
 
         const participantExists = await db.collection("participants").findOne({ name: user });
 
+        if(user=[]){
+            res.sendStatus(422);
+            return;
+        }
+        
         if (!participantExists) {
             res.sendStatus(409);
             return;
