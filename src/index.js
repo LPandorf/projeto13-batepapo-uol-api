@@ -19,16 +19,10 @@ mongoClient.connect().then(()=>{
 });
 
 //formatos
-/* const participantFormat=joi.object({
-    name: joi.string().min(1).required(),
-    laststatus: joi.number()
-}); */
 const messageFormat=joi.object({
-    //from: joi.string().required(),
     to: joi.string().min(1).required(),
     text: joi.string().min(1).required(),
     type: joi.string().valid("message", "private_message").required(),
-    //time: joi.string()
 });
 
 // /participants
@@ -71,43 +65,7 @@ app.post("/participants", async (req, res) => {
         res.status(500).send(error.message);
     }
 
-});
-/* app.post("/participants", async (req, res) => {
-    const participant = req.body;
-    const validation=participantFormat.validate(participant, {abortEarly: false});
-
-    if(validation.error){
-        const errors=validation.error.details.map((detail)=>detail.message);
-        res.status(422).send(errors);
-        return;
-    }
-
-    try{
-        const participantExists=await db.collection("participants").findOne({name: participant.name});
-        
-        if(participantExists){
-            res.sendStatus(409);
-            return;
-        }
-
-        await db.collection("participants").insertOne({
-            name: participant.name, 
-            laststatus: Date.now()
-        });
-        await db.collection("messages").insertOne({
-            from: participant.name,
-            to: "Todos",
-            text: "entra na sala...",
-            type: "status",
-            time: dayjs().format("HH:mm:ss")
-        });
-        res.sendStatus(201);
-        
-    }catch(error){
-        res.status(500).send(error.message);
-    }
-
-}); */
+});    
 app.get("/participants", async (req, res) => {
     try{
         const participants=await db.collection("participants").find().toArray();
@@ -125,7 +83,6 @@ app.get("/participants", async (req, res) => {
 // /messages
 app.post("/messages", async (req, res) => {
     const serverMessage = req.body;
-    //const { user } = req.headers;
     const user = req.headers.user;
 
     try {
@@ -145,11 +102,6 @@ app.post("/messages", async (req, res) => {
 
         const participantExists = await db.collection("participants").findOne({ name: user });
 
-        /* if(user===[]){
-            res.sendStatus(422);
-            return;
-        }  */
-
         if (!participantExists) {
             res.sendStatus(422);
             return;
@@ -162,68 +114,22 @@ app.post("/messages", async (req, res) => {
         res.status(500).send(error.message);
     }
 });
-/* app.post("/messages", async (req, res) => {
-    const {servermessage}=req.body;
-    const {user}=req.headers;
-
-    try{
-        const validation=messageFormat.validate(servermessage, {abortEarly: false});
-        const message = {
-            from: user,
-            ...servermessage,
-            time: dayjs().format("HH:mm:ss")
-        };
-
-        if(validation.error){
-            const errors=validation.error.details.map((detail)=>detail.message);
-            res.status(422).send(errors);
-            return;
-        }
-
-        const participantExists=await db.collection("participants").findOne({name: user});
-        
-        if(!participantExists){
-            res.sendStatus(409);
-            return;
-        }
-
-        await db.collection("messages").insertOne(message);
-        res.sendStatus(201);
-
-    }catch(error){
-        res.status(500).send(error.message);
-    }
-}); */
 app.get("/messages", async (req, res)=>{
     const limit=req.query.limit;
     const {user}=req.headers;
 
     try{
-        /* const messages = await db.collection("messages").find().toArray();
-        const filtered = messages.filter((message)=>{
-            const {from,to,type} = message;
-            const toUser=to==="todos" || to===user || from===user;
-            const inPublic=type==="message";
-
-            return toUser || inPublic;
-        }); */
-
         const messages = await db.collection("messages").find({ $or: [{ from: user }, { to: "Todos" }, { to: user }] }).toArray();
         
-        /* if(limit && limit!==NaN){
-            return res.send(messages.slice(-limit));
-        }
-
-        res.send(messages); */
-
         if (!limit) return res.send(messages);
+        
         if (limit > 0 && parseInt(limit)!== "NaN") {
             const dados = messages.reverse().slice(0, parseInt(limit));
             return res.send(dados);
         }else{
             return res.sendStatus(422);
         }
-        //res.send(messages.slice(-limit));
+        
     }catch(error){
         res.status(500).send(error.message);
     }
