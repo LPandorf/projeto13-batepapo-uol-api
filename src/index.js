@@ -231,7 +231,7 @@ app.get("/messages", async (req, res)=>{
 
 // /status
 app.post("status", async (req, res) =>{
-    const {user} = req.headers;
+    const user = req.headers.user;
 
     try{
         const existing=await db.collection("participants").findOne({name: user});
