@@ -237,8 +237,7 @@ app.post("status", async (req, res) =>{
         const existing=await db.collection("participants").findOne({name: user});
 
         if(!existing){
-            res.sendStatus(404);
-            return;
+            return res.sendStatus(404);
         }
 
         await db.collection("participants").updateOne({name: user},{$set:{lastStatus:Date.now()}});
