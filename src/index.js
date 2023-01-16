@@ -195,7 +195,7 @@ app.post("/messages", async (req, res) => {
     }
 }); */
 app.get("/messages", async (req, res)=>{
-    const limit=parseInt(req.query.limit);
+    const limit=req.query.limit;
     const {user}=req.headers;
 
     try{
@@ -217,15 +217,13 @@ app.get("/messages", async (req, res)=>{
         res.send(messages); */
 
         /* if (!limit) return res.send(messages); */
-        if(limit<=0){
-            res.sendStatus(422);
-            return;
-        }
-        if (limit > 0 && limit!== "NaN") {
-            const dados = messages.reverse().slice(0, limit);
+        if (limit > 0 && parseInt(limit)!== "NaN") {
+            const dados = messages.reverse().slice(0, parseInt(limit));
             return res.send(dados);
+        }else{
+            return res.sendStatus(422);
         }
-        res.send(messages.slice(-limit));
+        //res.send(messages.slice(-limit));
     }catch(error){
         res.status(500).send(error.message);
     }
