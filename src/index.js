@@ -231,9 +231,10 @@ app.get("/messages", async (req, res)=>{
 
 // /status
 app.post("status", async (req, res) =>{
-    const user = req.headers.user;
+    
 
     try{
+        const user = req.headers.user;
         const existing=await db.collection("participants").findOne({name: user});
 
         if(!existing){
