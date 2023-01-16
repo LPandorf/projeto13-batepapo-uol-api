@@ -217,6 +217,10 @@ app.get("/messages", async (req, res)=>{
         res.send(messages); */
 
         /* if (!limit) return res.send(messages); */
+        if(limit<=0){
+            res.sendStatus(422);
+            return;
+        }
         if (limit > 0 && limit!== "NaN") {
             const dados = messages.reverse().slice(0, limit);
             return res.send(dados);
