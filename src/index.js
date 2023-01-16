@@ -241,7 +241,7 @@ app.post("status", async (req, res) =>{
             return;
         }
 
-        await db.collection("participants").updateOne({name: uSser},{$set:{lastStatus:Date.now()}});
+        await db.collection("participants").updateOne({name: user},{$set:{lastStatus:Date.now()}});
 
         res.sendStatus(200);
     }catch(error){
